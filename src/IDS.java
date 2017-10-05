@@ -24,7 +24,7 @@ public class IDS {
         this.N = N;
         this.B = B;
 
-        action = Action.getInstance(N,B);
+        action = new Action(N,B);
         int limit = 0;
         int result;
         State state;
@@ -66,7 +66,7 @@ public class IDS {
         }
         if (limit == 0) {
             explored.remove(state);
-            System.out.println("cut off");
+            //System.out.println("cut off");
             return CUTOFF;
         }
 
@@ -77,7 +77,7 @@ public class IDS {
             // graph search
             // only expand valid and non-repetitive states
             if (child != null && !explored.contains(child)) {
-                System.out.println(child);
+                //System.out.println(child);
                 // recursion, decreasing limit
                 int result = search(child, limit - 1);
                 if (result == CUTOFF) {

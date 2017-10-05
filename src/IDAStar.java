@@ -22,7 +22,7 @@ public class IDAStar {
         this.N = N;
         this.B = B;
 
-        action = Action.getInstance(N,B);
+        action = new Action(N,B);
         records = new Stack<>();
         State state = new State(N);
         path = new Stack<>();
@@ -80,7 +80,7 @@ public class IDAStar {
             // graph search
             // only expand valid and non-repetitive states
             if (child != null && !path.contains(child)) {
-                System.out.println(child);
+                //System.out.println(child);
                 path.push(child);
                 int result = search(g + 1, limit);
                 if (result == SUCCESS) {

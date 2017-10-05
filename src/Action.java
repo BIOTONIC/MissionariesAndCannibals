@@ -8,8 +8,6 @@ public class Action {
     public static ArrayList<Integer> mbs; // list of numbers of missionaries on boat
     public static ArrayList<Integer> cbs; // list of numbers of cannibals on boat
 
-    private static Action action;
-
     Action(int N, int B) {
         mbs = new ArrayList<>();
         cbs = new ArrayList<>();
@@ -21,12 +19,5 @@ public class Action {
                 }
             }
         }
-    }
-
-    public static synchronized Action getInstance(int N, int B) {
-        if (action == null) {
-            action = new Action(N, B);
-        }
-        return action;
     }
 }

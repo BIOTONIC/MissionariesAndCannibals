@@ -4,7 +4,7 @@
 */
 public class Test {
     public static void main(String[] args) {
-        new IDS(7, 4,1000);
-        new IDAStar(3,2, 1000);
+        new IDS(5, 3, 1000);
+        new IDAStar(7, 4, 1000);
     }
 }
