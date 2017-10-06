@@ -1,5 +1,5 @@
-## CP468 Assignment1 Missionaries and Cannibals
-### By Group 4 ZZ-TW-ML-YC
+## CP468 Assignment 1 Missionaries and Cannibals
+### by Group 4 ZZ-TW-ML-YC
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   tex2jax: {inlineMath: [['$','$'], ['$','$']]}
@@ -11,7 +11,7 @@ MathJax.Hub.Config({
 
 For convenience, in the remainder, each abbreviation has its own meaning: 
 
-|Abbreviation|Meanning|
+|Abbreviation|Meaning|
 |-|-|
 |$\mathbf{M}$|missionary|
 |$\mathbf{C}$|cannibal|
@@ -28,12 +28,16 @@ For convenience, in the remainder, each abbreviation has its own meaning:
 |$L(mb,cb)$|carry $mb \mathbf{M}$ and $cb \mathbf{C}$ to left side|
 |$R(mb,cb)$|carry $mb \mathbf{M}$ and $cb \mathbf{C}$ to right side| 
 
-####Reality constraints
+<br/>
+####Reality Constraints
 Each number must be non-negative and less than the total number: $$0<=ml,mb,mr,cl,cb,cr<=N$$ $$0<=mb,cb<=B$$ $$ml+mb+mr==cl+cb+cr==N$$
 The boat can not across the river without someone in it: $$0<mb+cb<=B$$
 
-####Security constraints
-Whether on left, right or in boat, the number of $\mathbf{M}$ should not less than that of $\mathbf{C}$: $$ml==0||ml>=cl$$ $$mb==0||mb>=cb$$ $$mr==0||mr>=cr$$
+<br/>
+####Security Constraints
+Whether on left, right or in boat, the number of $\mathbf{M}$ should not less than that of $\mathbf{C}$: 
+<br/> 
+$$ml==0||ml>=cl$$ $$mb==0||mb>=cb$$ $$mr==0||mr>=cr$$
 
 #### Initial State
 $N \mathbf{M}$ and $N \mathbf{C}$ are on one side, let's say left side, with a boat at the same side, described as $(N,N,1)$.
@@ -45,9 +49,10 @@ $N \mathbf{M}$, $N \mathbf{C}$ and the boat are on the right side, described as 
 Take $N==3$, $B==2$ as an example, below is the complete state space graph:
 ![](./statespace.png)
 
-There are 10 states and $16*2=32$ transitions in total. For short we just show half of transitions:
+<br/>
+There are 15 states, 10 actions and 16*2=32 transition models in total. For short we just show half of these transition models:
 
-|Transitions|
+|Transition Models|
 |-|
 $Result\bigl((3,3,1),R(1,1)\bigr)=(2,2,0)$  
 $Result\bigl((3,3,1),R(0,1)\bigr)=(3,2,0)$  
@@ -71,34 +76,34 @@ Path cost increased by one each time when the boat cross the river.
 
 #### Algorithm Analysis
 We considered two algorithms for this problem:  
-iterative deenpening depth-first search(IDS) and iterative deepening a\* search(IDA\*).  
+iterative deepening depth-first search(IDS) and iterative deepening a\* search(IDA\*).  
 
 ||IDS|IDA\*|
 |-|-|-|
-|complete|Y|Y|
-|optimal|Y|Y|
-|time|$O(b^d)$|$O(b^d)$|
-|space|$O(bd)$|$O(bd)$|
+|Complete|Y|Y|
+|Optimal|Y|Y|
+|Time|$O(b^d)$|$O(b^d)$|
+|Space|$O(bd)$|$O(bd)$|
 
 IDS and IDA\* are both complete in that they will continue searching until find a solution or exhaust all states. They are optimal in that the cost is increasing during iteration, in other words, the first solution found must cost least.  
 IDS and IDA\* are also the same in structure: outside is a iteration of limit and inside is a recursion of search function.  
 But IDS uses $g(n)$ (cost from start state to current state $n$) as limit, IDA\* uses $f(n)=g(n)+h(n)$ (global estimated cost) instead.  
-Moreover, IDS does DFS within the limit from one child state; while IDA\* will expand at the child state with the minimum value of $f(n)$.  
+Moreover, IDS does DFS within the limit from one child state; while IDA\* will expand at the child state with the minimum value of $f(n)$.   
 
-Another thing worth talking is the selection of hueristic function of IDA\*.  
+#### Heuristic for IDA*
+Suppose a relaxed situation without the security constraint: $\mathbf{M}$ and $\mathbf{C}$ can stay together with any combinations.  
+In order to cost least, we fill the boat with at most $B$ people every time from left to right but only let one man come back to pick up remaining people.  
+Follow this way, in the last time we send $B$ people to right, while in other rounds(turn right then come back to left) we can send at most $B-1$ people each time across the river.  
+In states when the boat is on the left, $(ml,cl,1)$, it costs at least: $$2*\left\lceil ml+cl-B \over B-1 \right\rceil +1$$
 
-//TODO 启发函数的选择
+In states when the boat is on the right, $(ml,cl,0)$, since just one person can come to the left, we can transform state from $(ml,cl,0)$ to $(ml+1,cl,1)$ or $(ml,cl+1,1)$ with one step, thus it costs at least: $$2*\left\lceil ml+cl+1-B \over B-1 \right\rceil +2$$
 
-#### Implementation in Java
-Source code can be find here: https://github.com/BIOTONIC/MissionariesAndCannibals
+Since the two polynomials together describe an optimal cost of the relaxed problem, they are consistent heuristic for the origin $\mathbf{M}$ and $\mathbf{C}$ problem.
 
-|Test.java|State.java|Action.java|IDS.java|IDAStar.java|
-|-|-|-|-|-|
-|call two algorithms|store state's info & provide functions related to state|use two lists to store all valid arrangements of $\mathbf{M}$ and $\mathbf{C}$ on boat|IDS algorithm|IDA* algorithm|
-
-Below is the output of two algorithms when $N==3$ and $B==2$. Solutions of two algorithms are the same because they traverse all actions of a given state by the same sequence provided by Action.java. One difference is that IDA\*'s limit starts directly from 4.
+#### Outputs
+Below is the output of two algorithms when $N==3$ and $B==2$. Solutions of two algorithms are the same because they traverse all actions in the same sequence provided by Action.java. One difference is that IDA\*'s limit starts directly from 9, owing its efficiency to the heuristic function.
 ```
-iterative deepening depth-first search
+IDS N=3 B=2
 try depth limit 1
 try depth limit 2
 try depth limit 3
@@ -123,14 +128,8 @@ step 9: (0,3,1) => (0,2)
 step 10: (0,1,0) <= (0,1)
 step 11: (0,2,1) => (0,2)
 
-iterative deepening a star search
-try depth limit 4
-try depth limit 5
-try depth limit 6
-try depth limit 7
-try depth limit 8
+IDA* N=3 B=2
 try depth limit 9
-try depth limit 10
 try depth limit 11
 optimal solution found
 step 1: (3,3,1) => (0,2)
@@ -146,33 +145,36 @@ step 10: (0,1,0) <= (0,1)
 step 11: (0,2,1) => (0,2)
 ```
 
-Both algorithms are able to solve $N$ missionaries, $N$ cannibals and $B$ seats problems. Below is the ouput when $N==7$ and $B==4$:
-```
-step 1: (7,7,1) => (0,4)
-step 2: (7,3,0) <= (0,2)
-step 3: (7,5,1) => (0,4)
-step 4: (7,1,0) <= (0,2)
-step 5: (7,3,1) => (4,0)
-step 6: (3,3,0) <= (1,1)
-step 7: (4,4,1) => (2,2)
-step 8: (2,2,0) <= (1,1)
-step 9: (3,3,1) => (2,2)
-step 10: (1,1,0) <= (1,1)
-step 11: (2,2,1) => (2,2)
-```
+Both algorithms are able to solve $N$ missionaries, $N$ cannibals and $B$ seats problems. Below are optimal costs when $N<=10$ and $B<=10$:
 
-//TODO 何时有解无解
+|$\mathbf{B}\\ \mathbf{N}$|$\mathbf{1}$|$\mathbf{2}$|$\mathbf{3}$|$\mathbf{4}$|$\mathbf{5}$|$\mathbf{6}$|$\mathbf{7}$|$\mathbf{8}$|$\mathbf{9}$|$\mathbf{10}$|
+|-----|---|---|----|---|----|----|----|----|----|----|
+|$\mathbf{1}$| N | N | N  | N | N  | N  | N  | N  | N  | N  |
+|$\mathbf{2}$| 1 | 5 | 11 | N | N  | N  | N  | N  | N  | N  |
+|$\mathbf{3}$| 1 | 3 | 5  | 9 | 11 | 13 | N  | N  | N  | N  |
+|$\mathbf{4}$| 1 | 1 | 3  | 5 | 7  | 9  | 11 | 13 | 15 | 17 |
+|$\mathbf{5}$| 1 | 1 | 3  | 3 | 5  | 7  | 7  | 9  | 9  | 11 |
+|$\mathbf{6}$| 1 | 1 | 1  | 3 | 3  | 5  | 5  | 7  | 7  | 9  |
+|$\mathbf{7}$| 1 | 1 | 1  | 3 | 3  | 3  | 5  | 5  | 7  | 7  |
+|$\mathbf{8}$| 1 | 1 | 1  | 1 | 3  | 3  | 3  | 5  | 5  | 5  |
+|$\mathbf{9}$| 1 | 1 | 1  | 1 | 3  | 3  | 3  | 3  | 5  | 5  |
+|$\mathbf{10}$| 1 | 1 | 1  | 1 | 1  | 3  | 3  | 3  | 3  | 5  |
 
+#### Source Codes
+Source codes can be find here: https://github.com/BIOTONIC/MissionariesAndCannibals
 
-The remainder is the source code. Download it from [github](https://github.com/BIOTONIC/MissionariesAndCannibals) if you want to run and test it.
+|Test.java|State.java|Action.java|IDS.java|IDAStar.java|
+|-|-|-|-|-|
+|call two algorithms|store state's info & provide functions related to state|use two lists to store all valid arrangements of $\mathbf{M}$ and $\mathbf{C}$ on boat|IDS algorithm|IDA* algorithm|
+
 ```
 // Test.java
 // call two algorithms
 
 public class Test {
     public static void main(String[] args) {
-        new IDS(7, 4, 1000); // N=7 B=4 upperLimit=1000
-        new IDAStar(3, 2, 1000); // N=3 B=2 upperLimit=1000
+        new IDS(3, 2);
+        new IDAStar(3,2);
     }
 }
 ```
@@ -183,7 +185,8 @@ public class Test {
 // store state's info & provide functions related to state
 
 class State {
-    int n; // numbers of missionaries or cannibals
+    int N; // numbers of missionaries or cannibals
+    int B; // number of seats on boat
     int ml; // numbers of missionaries on the left
     int cl; // numbers of cannibals on the left
     int pos; // current position of the boat, 0: on the right, 1: on the left
@@ -191,15 +194,17 @@ class State {
     // start state: ml=N, cl=N, pos=1
     // goal state: ml=0, cl=0, pos=0
 
-    State(int n) {
-        this.n = n;
-        this.ml = n;
-        this.cl = n;
+    State(int N, int B) {
+        this.N = N;
+        this.B = B;
+        this.ml = N;
+        this.cl = N;
         this.pos = 1;
     }
 
-    State(int n, int ml, int cl, int pos) {
-        this.n = n;
+    State(int N, int B, int ml, int cl, int pos) {
+        this.N = N;
+        this.B = B;
         this.ml = ml;
         this.cl = cl;
         this.pos = pos;
@@ -212,10 +217,10 @@ class State {
             // 0<=ml+mb<=N
             // && 0<=cl+cb<=N
             // && (ml+mb==0||ml+mb==N||ml+mb==cl+cb)
-            if (ml + mb >= 0 && ml + mb <= n
-                    && cl + cb >= 0 && cl + cb <= n
-                    && (ml + mb == 0 || ml + mb == n || ml + mb == cl + cb)) {
-                return new State(n, ml + mb, cl + cb, 1);
+            if (ml + mb >= 0 && ml + mb <= N
+                    && cl + cb >= 0 && cl + cb <= N
+                    && (ml + mb == 0 || ml + mb == N || ml + mb == cl + cb)) {
+                return new State(N, B, ml + mb, cl + cb, 1);
             } else {
                 return null;
             }
@@ -225,10 +230,10 @@ class State {
             // 0<=ml-mb<=N
             // && 0<=cl-cb<=N
             // && (ml==mb||ml+mb==N||ml-mb==cl-cb)
-            if (ml - mb >= 0 && ml - mb <= n
-                    && cl - cb >= 0 && cl - cb <= n
-                    && (ml == mb || ml + mb == n || ml - mb == cl - cb)) {
-                return new State(n, ml - mb, cl - cb, 0);
+            if (ml - mb >= 0 && ml - mb <= N
+                    && cl - cb >= 0 && cl - cb <= N
+                    && (ml == mb || ml + mb == N || ml - mb == cl - cb)) {
+                return new State(N, B, ml - mb, cl - cb, 0);
             } else {
                 return null;
             }
@@ -247,7 +252,7 @@ class State {
             return false;
         }
         State otherState = (State) other;
-        if (otherState.n == this.n && otherState.ml == this.ml
+        if (otherState.N == this.N && otherState.B == this.B && otherState.ml == this.ml
                 && otherState.cl == this.cl && otherState.pos == this.pos) {
             return true;
         } else {
@@ -274,6 +279,14 @@ class State {
             return true;
         } else {
             return false;
+        }
+    }
+
+    int getHeuristic() {
+        if (pos == 1) {
+            return 1 + 2 * (int) Math.ceil((double) (ml + cl - B) / (B - 1));
+        } else {
+            return 2 + 2 * (int) Math.ceil((double) (ml + cl + 1 - B) / (B - 1));
         }
     }
 }
@@ -306,6 +319,7 @@ public class Action {
 
 ```
 // IDS.java
+
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -321,32 +335,29 @@ public class IDS {
     static final int FAILURE = -1;
     static final int CUTOFF = -2;
 
-    public IDS(int N, int B, int upperLimit) {
-        System.out.println("iterative deepening depth-first search");
+    public IDS(int N, int B) {
+        System.out.println("\nIDS N=" + N + " B=" + B);
 
         this.N = N;
         this.B = B;
 
-        action = new Action(N,B);
+        action = new Action(N, B);
         int limit = 0;
         int result;
         State state;
-        do {
+        while (true) {
             // iterate limit
             limit++;
             System.out.println("try depth limit " + limit);
             // init state and explored list before every iteration
-            state = new State(N);
+            state = new State(N, B);
             explored = new ArrayList<>();
             records = new Stack<>();
             result = search(state, limit);
-            if (result == SUCCESS) {
-                break;
-            } else if (result >= upperLimit) {
-                result = FAILURE;
+            if (result == SUCCESS || result == FAILURE) {
                 break;
             }
-        } while (search(state, limit) != SUCCESS);
+        }
 
         // print result
         if (result == SUCCESS) {
@@ -356,7 +367,7 @@ public class IDS {
                 i++;
             }
         } else {
-            System.out.println("no solution when upper limit is " + limit);
+            System.out.println("no solution");
         }
     }
 
@@ -384,13 +395,8 @@ public class IDS {
                 // recursion, decreasing limit
                 int result = search(child, limit - 1);
                 if (result == CUTOFF) {
-                    // once result from child is cutoff (child state limit == 0)
-                    // current state is cutoff too
-                    // need to increase depth limit
-                    // so just jump out of the for loop immediately
                     isCutoff = true;
-                    break;
-                } else if (result != FAILURE) {
+                } else if (result ==SUCCESS) {
                     // find a step
                     records.push(state.toPath(action.mbs.get(i), action.cbs.get(i)));
                     explored.remove(state);
@@ -402,7 +408,6 @@ public class IDS {
         if (isCutoff) {
             return CUTOFF;
         } else {
-            System.out.println("no solution");
             return FAILURE;
         }
     }
@@ -425,32 +430,29 @@ public class IDAStar {
     static final int SUCCESS = 0;
     static final int FAILURE = -1;
 
-    public IDAStar(int N, int B, int upperLimit) {
-        System.out.println("iterative deepening a star search");
+    public IDAStar(int N, int B) {
+        System.out.println("\nIDA* N=" + N + " B=" + B);
 
         this.N = N;
         this.B = B;
 
-        action = new Action(N,B);
+        action = new Action(N, B);
         records = new Stack<>();
-        State state = new State(N);
+        State state = new State(N, B);
         path = new Stack<>();
         path.push(state);
-        int limit = h(state);
+        int limit = state.getHeuristic();
 
         int result;
-        do {
+        while (true) {
             System.out.println("try depth limit " + limit);
 
             result = search(0, limit);
-            if (result == SUCCESS) {
-                break;
-            } else if (result >= upperLimit) {
-                result = FAILURE;
+            if (result == SUCCESS || result == FAILURE) {
                 break;
             }
             limit = result;
-        } while (result != SUCCESS);
+        }
 
         // print result
         if (result == SUCCESS) {
@@ -465,17 +467,13 @@ public class IDAStar {
                 i++;
             }
         } else {
-            System.out.println("no solution when upper limit is " + limit);
+            System.out.println("no solution");
         }
-    }
-
-    int h(State state) {
-        return state.ml + state.cl - 2 * state.pos;
     }
 
     int search(int g, int limit) {
         State state = path.peek();
-        int f = g + h(state);
+        int f = g + state.getHeuristic();
         if (f > limit) {
             return f;
         } else if (state.isGoal()) {
@@ -492,16 +490,19 @@ public class IDAStar {
                 //System.out.println(child);
                 path.push(child);
                 int result = search(g + 1, limit);
+                if (result > 100) {
+                    System.out.println(child);
+                }
                 if (result == SUCCESS) {
                     return SUCCESS;
                 }
-                if (result < min) {
+                if (result != FAILURE && result < min) {
                     min = result;
                 }
                 path.pop();
             }
         }
-        return min;
+        return min == Integer.MAX_VALUE ? FAILURE : min;
     }
 }
 ```

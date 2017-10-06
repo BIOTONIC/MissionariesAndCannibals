@@ -16,32 +16,29 @@ public class IDAStar {
     static final int SUCCESS = 0;
     static final int FAILURE = -1;
 
-    public IDAStar(int N, int B, int upperLimit) {
-        System.out.println("iterative deepening a star search");
+    public IDAStar(int N, int B) {
+        System.out.println("\nIDA* N=" + N + " B=" + B);
 
         this.N = N;
         this.B = B;
 
-        action = new Action(N,B);
+        action = new Action(N, B);
         records = new Stack<>();
-        State state = new State(N);
+        State state = new State(N, B);
         path = new Stack<>();
         path.push(state);
-        int limit = h(state);
+        int limit = state.getHeuristic();
 
         int result;
-        do {
+        while (true) {
             System.out.println("try depth limit " + limit);
 
             result = search(0, limit);
-            if (result == SUCCESS) {
-                break;
-            } else if (result >= upperLimit) {
-                result = FAILURE;
+            if (result == SUCCESS || result == FAILURE) {
                 break;
             }
             limit = result;
-        } while (result != SUCCESS);
+        }
 
         // print result
         if (result == SUCCESS) {
@@ -56,17 +53,13 @@ public class IDAStar {
                 i++;
             }
         } else {
-            System.out.println("no solution when upper limit is " + limit);
+            System.out.println("no solution");
         }
-    }
-
-    int h(State state) {
-        return state.ml + state.cl - 2 * state.pos;
     }
 
     int search(int g, int limit) {
         State state = path.peek();
-        int f = g + h(state);
+        int f = g + state.getHeuristic();
         if (f > limit) {
             return f;
         } else if (state.isGoal()) {
@@ -83,15 +76,18 @@ public class IDAStar {
                 //System.out.println(child);
                 path.push(child);
                 int result = search(g + 1, limit);
+                if (result > 100) {
+                    System.out.println(child);
+                }
                 if (result == SUCCESS) {
                     return SUCCESS;
                 }
-                if (result < min) {
+                if (result != FAILURE && result < min) {
                     min = result;
                 }
                 path.pop();
             }
         }
-        return min;
+        return min == Integer.MAX_VALUE ? FAILURE : min;
     }
 }

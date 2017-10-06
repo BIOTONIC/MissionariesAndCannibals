@@ -3,7 +3,8 @@
 * depict status structure for IDS & IDA*
 */
 class State {
-    int n; // numbers of missionaries or cannibals
+    int N; // numbers of missionaries or cannibals
+    int B; // number of seats on boat
     int ml; // numbers of missionaries on the left
     int cl; // numbers of cannibals on the left
     int pos; // current position of the boat, 0: on the right, 1: on the left
@@ -11,15 +12,17 @@ class State {
     // start state: ml=N, cl=N, pos=1
     // goal state: ml=0, cl=0, pos=0
 
-    State(int n) {
-        this.n = n;
-        this.ml = n;
-        this.cl = n;
+    State(int N, int B) {
+        this.N = N;
+        this.B = B;
+        this.ml = N;
+        this.cl = N;
         this.pos = 1;
     }
 
-    State(int n, int ml, int cl, int pos) {
-        this.n = n;
+    State(int N, int B, int ml, int cl, int pos) {
+        this.N = N;
+        this.B = B;
         this.ml = ml;
         this.cl = cl;
         this.pos = pos;
@@ -32,10 +35,10 @@ class State {
             // 0<=ml+mb<=N
             // && 0<=cl+cb<=N
             // && (ml+mb==0||ml+mb==N||ml+mb==cl+cb)
-            if (ml + mb >= 0 && ml + mb <= n
-                    && cl + cb >= 0 && cl + cb <= n
-                    && (ml + mb == 0 || ml + mb == n || ml + mb == cl + cb)) {
-                return new State(n, ml + mb, cl + cb, 1);
+            if (ml + mb >= 0 && ml + mb <= N
+                    && cl + cb >= 0 && cl + cb <= N
+                    && (ml + mb == 0 || ml + mb == N || ml + mb == cl + cb)) {
+                return new State(N, B, ml + mb, cl + cb, 1);
             } else {
                 return null;
             }
@@ -45,10 +48,10 @@ class State {
             // 0<=ml-mb<=N
             // && 0<=cl-cb<=N
             // && (ml==mb||ml+mb==N||ml-mb==cl-cb)
-            if (ml - mb >= 0 && ml - mb <= n
-                    && cl - cb >= 0 && cl - cb <= n
-                    && (ml == mb || ml + mb == n || ml - mb == cl - cb)) {
-                return new State(n, ml - mb, cl - cb, 0);
+            if (ml - mb >= 0 && ml - mb <= N
+                    && cl - cb >= 0 && cl - cb <= N
+                    && (ml == mb || ml + mb == N || ml - mb == cl - cb)) {
+                return new State(N, B, ml - mb, cl - cb, 0);
             } else {
                 return null;
             }
@@ -67,7 +70,7 @@ class State {
             return false;
         }
         State otherState = (State) other;
-        if (otherState.n == this.n && otherState.ml == this.ml
+        if (otherState.N == this.N && otherState.B == this.B && otherState.ml == this.ml
                 && otherState.cl == this.cl && otherState.pos == this.pos) {
             return true;
         } else {
@@ -94,6 +97,14 @@ class State {
             return true;
         } else {
             return false;
+        }
+    }
+
+    int getHeuristic() {
+        if (pos == 1) {
+            return 1 + 2 * (int) Math.ceil((double) (ml + cl - B) / (B - 1));
+        } else {
+            return 2 + 2 * (int) Math.ceil((double) (ml + cl + 1 - B) / (B - 1));
         }
     }
 }

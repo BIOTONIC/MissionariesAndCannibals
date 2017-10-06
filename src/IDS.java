@@ -18,32 +18,29 @@ public class IDS {
     static final int FAILURE = -1;
     static final int CUTOFF = -2;
 
-    public IDS(int N, int B, int upperLimit) {
-        System.out.println("iterative deepening depth-first search");
+    public IDS(int N, int B) {
+        System.out.println("\nIDS N=" + N + " B=" + B);
 
         this.N = N;
         this.B = B;
 
-        action = new Action(N,B);
+        action = new Action(N, B);
         int limit = 0;
         int result;
         State state;
-        do {
+        while (true) {
             // iterate limit
             limit++;
             System.out.println("try depth limit " + limit);
             // init state and explored list before every iteration
-            state = new State(N);
+            state = new State(N, B);
             explored = new ArrayList<>();
             records = new Stack<>();
             result = search(state, limit);
-            if (result == SUCCESS) {
-                break;
-            } else if (result >= upperLimit) {
-                result = FAILURE;
+            if (result == SUCCESS || result == FAILURE) {
                 break;
             }
-        } while (search(state, limit) != SUCCESS);
+        }
 
         // print result
         if (result == SUCCESS) {
@@ -53,7 +50,7 @@ public class IDS {
                 i++;
             }
         } else {
-            System.out.println("no solution when upper limit is " + limit);
+            System.out.println("no solution");
         }
     }
 
@@ -81,13 +78,8 @@ public class IDS {
                 // recursion, decreasing limit
                 int result = search(child, limit - 1);
                 if (result == CUTOFF) {
-                    // once result from child is cutoff (child state limit == 0)
-                    // current state is cutoff too
-                    // need to increase depth limit
-                    // so just jump out of the for loop immediately
                     isCutoff = true;
-                    break;
-                } else if (result != FAILURE) {
+                } else if (result ==SUCCESS) {
                     // find a step
                     records.push(state.toPath(action.mbs.get(i), action.cbs.get(i)));
                     explored.remove(state);
@@ -99,7 +91,6 @@ public class IDS {
         if (isCutoff) {
             return CUTOFF;
         } else {
-            System.out.println("no solution");
             return FAILURE;
         }
     }

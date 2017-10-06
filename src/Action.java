@@ -2,6 +2,7 @@
 * missionaries and cannibals problem
 * depict all arrangements of m and c on boat
 */
+
 import java.util.ArrayList;
 
 public class Action {
